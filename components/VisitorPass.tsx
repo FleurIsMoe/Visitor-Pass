@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { User, Calendar, MapPin } from 'lucide-react'
 
 interface VisitorPassProps {
-  visitorNumber: number
+  visitorNumber: number;
 }
 
 export default function VisitorPass({ visitorNumber }: VisitorPassProps) {
@@ -53,49 +53,49 @@ export default function VisitorPass({ visitorNumber }: VisitorPassProps) {
 
   useEffect(() => {
     const fetchLocation = async () => {
-      const savedLocation = localStorage.getItem('location')
-      const savedDate = localStorage.getItem('locationDate')
-      const now = new Date()
-  
+      const savedLocation = localStorage.getItem('location');
+      const savedDate = localStorage.getItem('locationDate');
+      const now = new Date();
+
       if (savedLocation && savedDate) {
-        const savedDateTime = new Date(savedDate)
-        const timeDifference = now.getTime() - savedDateTime.getTime()
-        const oneDay = 24 * 60 * 60 * 1000 // milliseconds in one day
-  
+        const savedDateTime = new Date(savedDate);
+        const timeDifference = now.getTime() - savedDateTime.getTime();
+        const oneDay = 24 * 60 * 60 * 1000;
+
         if (timeDifference < oneDay) {
-          const locationData = JSON.parse(savedLocation)
-          setLocation(`${locationData.city}, ${locationData.country_name}`)
-          const dateFormat = locationData.country_code === 'US' ? 'en-US' : 'en-GB'
-          setCurrentDate(now.toLocaleDateString(dateFormat, { year: 'numeric', month: 'numeric', day: 'numeric' }))
-          return
+          const locationData = JSON.parse(savedLocation);
+          setLocation(`${locationData.city}, ${locationData.country_name}`);
+          const dateFormat = locationData.country_code === 'US' ? 'en-US' : 'en-GB';
+          setCurrentDate(now.toLocaleDateString(dateFormat, { year: 'numeric', month: 'numeric', day: 'numeric' }));
+          return;
         }
       }
-  
+
       try {
-        const res = await fetch('https://ipapi.co/json/')
-        if (!res.ok) throw new Error(`Failed to fetch location, status: ${res.status}`)
-        const data = await res.json()
-        console.log('Location data:', data) // Log the data for debugging
+        const res = await fetch('https://ipapi.co/json/');
+        if (!res.ok) throw new Error(`Failed to fetch location, status: ${res.status}`);
+        const data = await res.json();
+        console.log('Location data:', data); // Log the data for debugging
         if (data.city && data.country_name) {
-          setLocation(`${data.city}, ${data.country_name}`)
-          localStorage.setItem('location', JSON.stringify(data))
-          localStorage.setItem('locationDate', now.toISOString())
-  
-          const dateFormat = data.country_code === 'US' ? 'en-US' : 'en-GB'
-          setCurrentDate(now.toLocaleDateString(dateFormat, { year: 'numeric', month: 'numeric', day: 'numeric' }))
+          setLocation(`${data.city}, ${data.country_name}`);
+          localStorage.setItem('location', JSON.stringify(data));
+          localStorage.setItem('locationDate', now.toISOString());
+
+          const dateFormat = data.country_code === 'US' ? 'en-US' : 'en-GB';
+          setCurrentDate(now.toLocaleDateString(dateFormat, { year: 'numeric', month: 'numeric', day: 'numeric' }));
         } else {
-          throw new Error('Incomplete location data')
+          throw new Error('Incomplete location data');
         }
       } catch (error) {
-        console.error('Error fetching location:', error)
-        setLocation('Location unavailable')
+        console.error('Error fetching location:', error);
+        setLocation('Location unavailable');
         // Default to day/month/year format if location is unavailable
-        setCurrentDate(now.toLocaleDateString('en-GB', { year: 'numeric', month: 'numeric', day: 'numeric' }))
+        setCurrentDate(now.toLocaleDateString('en-GB', { year: 'numeric', month: 'numeric', day: 'numeric' }));
       }
-    }
-  
-    fetchLocation()
-  }, [])
+    };
+
+    fetchLocation();
+  }, [visitorNumber]);
 
   useEffect(() => {
     const card = cardRef.current

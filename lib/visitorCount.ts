@@ -1,22 +1,25 @@
-import fs from 'fs/promises'
-import path from 'path'
-
-const dataFilePath = path.join(process.cwd(), 'data', 'visitorCount.json')
+import clientPromise from './mongodb';
+import { ObjectId } from 'mongodb';
 
 export async function getVisitorCount(): Promise<number> {
   try {
-    await fs.mkdir(path.dirname(dataFilePath), { recursive: true })
+    const client = await clientPromise;
+    const db = client.db('visitor-pass');
+    const collection = db.collection('visitorCount');
 
-    const data = await fs.readFile(dataFilePath, 'utf8')
-    const { count } = JSON.parse(data)
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId('visitorCount') },
+      { $inc: { count: 1 } },
+      { returnDocument: 'after', upsert: true }
+    );
 
-    const newCount = count + 1
+    if (result === null || result.value === null) {
+      throw new Error('No document found');
+    }
 
-    await fs.writeFile(dataFilePath, JSON.stringify({ count: newCount }))
-
-    return newCount
+    return result.value.count;
   } catch (error) {
-    await fs.writeFile(dataFilePath, JSON.stringify({ count: 1 }))
-    return 1
+    console.error('Error getting visitor count:', error);
+    return 1;
   }
 }
