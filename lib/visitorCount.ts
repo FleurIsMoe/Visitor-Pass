@@ -12,8 +12,16 @@ export async function getVisitorCount(): Promise<number> {
       { returnDocument: 'after', upsert: true }
     );
 
-    if (result === null || result.value === null) {
-      throw new Error('No document found');
+    // Check if result is null
+    if (result === null) {
+      console.error('Error: result is null');
+      return 1;
+    }
+
+    // If result.value is undefined, initialize the count to 1
+    if (!result.value) {
+      await collection.insertOne({ type: 'visitorCount', count: 1 });
+      return 1;
     }
 
     return result.value.count;
