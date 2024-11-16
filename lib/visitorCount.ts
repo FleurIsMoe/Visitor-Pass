@@ -1,5 +1,4 @@
 import clientPromise from './mongodb';
-import { ObjectId } from 'mongodb';
 
 export async function getVisitorCount(): Promise<number> {
   try {
@@ -8,7 +7,7 @@ export async function getVisitorCount(): Promise<number> {
     const collection = db.collection('visitorCount');
 
     const result = await collection.findOneAndUpdate(
-      { _id: new ObjectId('visitorCount') },
+      { type: 'visitorCount' },
       { $inc: { count: 1 } },
       { returnDocument: 'after', upsert: true }
     );
