@@ -90,7 +90,6 @@ export default function VisitorPass({ visitorNumber }: VisitorPassProps) {
           transition: 'transform 0.2s ease-out'
         }}
       >
-        
         <div 
           className="absolute inset-0 opacity-10"
           style={{
