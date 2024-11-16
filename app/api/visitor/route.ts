@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb'
+import { MongoClient, ObjectId } from 'mongodb'
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Please add your Mongo URI to .env.local')
@@ -14,13 +14,13 @@ export async function GET() {
 
     // Use findOneAndUpdate to atomically increment the counter
     const result = await collection.findOneAndUpdate(
-      { _id: 'visitor_counter' },
+      { _id: new ObjectId('visitor_counter') },
       { $inc: { count: 1 } },
       { upsert: true, returnDocument: 'after' }
     )
 
     // Check if result is null
-    if (result === null) {
+    if (!result) {
       console.error('Error: result is null')
       return new Response(JSON.stringify({ visitorNumber: 1 }), {
         headers: {
@@ -32,9 +32,12 @@ export async function GET() {
       })
     }
 
-    // If result.value is undefined, initialize the count to 1
-    if (!result.value) {
-      await collection.insertOne({ _id: 'visitor_counter', count: 1 })
+    // If count is undefined, initialize it to 1
+    if (typeof result.count !== 'number') {
+      await collection.updateOne(
+        { _id: new ObjectId('visitor_counter') },
+        { $set: { count: 1 } }
+      )
       return new Response(JSON.stringify({ visitorNumber: 1 }), {
         headers: {
           'Content-Type': 'application/json',
@@ -46,7 +49,7 @@ export async function GET() {
     }
 
     // Return the new count
-    return new Response(JSON.stringify({ visitorNumber: result.value.count }), {
+    return new Response(JSON.stringify({ visitorNumber: result.count }), {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
